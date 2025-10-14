@@ -1,14 +1,16 @@
+# ========================================
+# PYTHON BACKEND
+# ========================================
+
 # Virtual environment
 venv/
+.env
 
-# Python cache files
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Environment variables
-.env
 
 # Logs
 *.log
@@ -16,3 +18,39 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# ========================================
+# FRONTEND (VITE + REACT)
+# ========================================
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Local environment files
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Editor / IDE settings
+.vscode/
+.idea/
+*.swp
+
+# Dependency lock / cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+*.local
+*.cache/
+*.eslintcache
+coverage/

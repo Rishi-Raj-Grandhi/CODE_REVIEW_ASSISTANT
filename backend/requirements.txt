@@ -1,0 +1,7 @@
+flask
+python-dotenv
+openai
+langchain
+langgraph
+tree_sitter
+pathlib
