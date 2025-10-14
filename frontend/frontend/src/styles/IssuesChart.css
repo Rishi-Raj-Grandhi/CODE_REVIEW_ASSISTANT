@@ -1,0 +1,19 @@
+.chart-container {
+  height: 100%;
+}
+
+.chart-container h3 {
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+}
+
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #2ecc71;
+  font-size: 1.5rem;
+  font-weight: 600;
+}

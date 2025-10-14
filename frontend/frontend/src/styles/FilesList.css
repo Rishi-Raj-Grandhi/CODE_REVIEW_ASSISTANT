@@ -1,0 +1,138 @@
+.files-list-container h3 {
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.files-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.files-list::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.files-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.files-list::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.file-item {
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: white;
+  border-left: 4px solid #ff6b6b;
+}
+
+.file-item.excellent {
+  border-left-color: #2ecc71;
+  background: #f0fdf4;
+}
+
+.file-item.excellent:hover {
+  border-left-color: #27ae60;
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+}
+
+.file-item.good {
+  border-left-color: #3498db;
+  background: #f0f8ff;
+}
+
+.file-item.good:hover {
+  border-left-color: #2980b9;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.file-item.fair {
+  border-left-color: #f39c12;
+  background: #fffbf0;
+}
+
+.file-item.fair:hover {
+  border-left-color: #e67e22;
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2);
+}
+
+.file-item.poor {
+  border-left-color: #e74c3c;
+  background: #fdf5f5;
+}
+
+.file-item.poor:hover {
+  border-left-color: #c0392b;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
+.file-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-name {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.file-score {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  background: #ff6b6b;
+}
+
+.file-item.excellent .file-score {
+  background: #2ecc71;
+}
+
+.file-item.good .file-score {
+  background: #3498db;
+}
+
+.file-item.fair .file-score {
+  background: #f39c12;
+}
+
+.file-item.poor .file-score {
+  background: #e74c3c;
+}
+
+.file-details {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.detail-row span:last-child {
+  font-weight: 600;
+  color: #1a1a1a;
+}
