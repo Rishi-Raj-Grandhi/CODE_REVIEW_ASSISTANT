@@ -17,7 +17,33 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY not found in .env file.")
 
-# ---------------- LangChain Model ---------------- #
+# ==================== VALID ISSUE TYPES ====================
+
+VALID_ISSUE_TYPES = [
+    "Bug Risk",
+    "Logic Error",
+    "Code Smell",
+    "Poor Naming",
+    "Overcomplicated",
+    "Style",
+    "Documentation",
+    "Performance",
+    "Resource Leak",
+    "Security",
+    "Authentication",
+    "Unsafe Operation",
+    "Best Practice",
+    "Error Handling",
+    "Testing",
+    "Compatibility",
+    "Dependency",
+    "Type Safety",
+    "Concurrency"
+]
+
+VALID_SEVERITIES = ["Minor", "Major", "Critical"]
+
+# ==================== LANGCHAIN MODEL ====================
 
 llm = ChatOpenAI(
     model="gpt-4o-mini",
@@ -25,7 +51,7 @@ llm = ChatOpenAI(
     api_key=openai_api_key
 )
 
-# ---------------- Enhanced File Configuration ---------------- #
+# ==================== FILE CONFIGURATION ====================
 
 COMPREHENSIVE_REVIEWABLE_EXTS = {
     # Frontend
@@ -67,7 +93,7 @@ PRIORITY_FILES = {
     "dockerfile", "docker-compose.yml"
 }
 
-# ---------------- Graph State ---------------- #
+# ==================== GRAPH STATE ====================
 
 class ReviewState(dict):
     code: str
@@ -75,7 +101,45 @@ class ReviewState(dict):
     file_path: str
     result: dict
 
-# ---------------- Enhanced LLM Node with Comprehensive Analysis ---------------- #
+# ==================== VALIDATION FUNCTIONS ====================
+
+def validate_issue(issue: Dict[str, Any]) -> bool:
+    """Validate that issue has correct type and severity."""
+    if issue.get("type") not in VALID_ISSUE_TYPES:
+        return False
+    if issue.get("severity") not in VALID_SEVERITIES:
+        return False
+    return True
+
+
+def fix_invalid_issues(issues: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Remove or fix invalid issues."""
+    fixed_issues = []
+    for issue in issues:
+        if validate_issue(issue):
+            fixed_issues.append(issue)
+        else:
+            # Try to fix invalid type
+            if issue.get("type") not in VALID_ISSUE_TYPES:
+                issue["type"] = "Code Smell"  # Default fallback
+            if issue.get("severity") not in VALID_SEVERITIES:
+                issue["severity"] = "Minor"  # Default fallback
+            if validate_issue(issue):
+                fixed_issues.append(issue)
+    return fixed_issues
+
+
+def count_issues_by_type(issues: List[Dict[str, Any]]) -> Dict[str, int]:
+    """Count issues grouped by type."""
+    type_counts = {issue_type: 0 for issue_type in VALID_ISSUE_TYPES}
+    for issue in issues:
+        issue_type = issue.get("type", "Code Smell")
+        if issue_type in type_counts:
+            type_counts[issue_type] += 1
+    return {k: v for k, v in type_counts.items() if v > 0}
+
+
+# ==================== LLM NODE ====================
 
 def analyze_code_node(state: ReviewState) -> ReviewState:
     """Enhanced LangChain-based code review node."""
@@ -83,8 +147,10 @@ def analyze_code_node(state: ReviewState) -> ReviewState:
     filename = state["filename"]
     file_path = state.get("file_path", filename)
 
-    # Determine file type for context
     _, ext = os.path.splitext(filename)
+    
+    valid_types_str = ", ".join(VALID_ISSUE_TYPES)
+    valid_severities_str = ", ".join(VALID_SEVERITIES)
     
     prompt = f"""
 You are a professional code reviewer. Review the following file: `{file_path}` (extension: {ext})
@@ -97,8 +163,8 @@ Provide ONLY valid JSON with this EXACT structure:
   "issues": [
       {{
           "line_range": [start, end],
-          "type": "Bug Risk" | "Code Smell" | "Style" | "Security" | "Performance" | "Best Practice",
-          "severity": "Minor" | "Major" | "Critical",
+          "type": "{valid_types_str}",
+          "severity": "{valid_severities_str}",
           "message": "Clear description of the issue",
           "recommendation": "Specific fix or improvement",
           "code_example": "Optional: show corrected code"
@@ -126,16 +192,40 @@ Provide ONLY valid JSON with this EXACT structure:
       "performance": 0-100,
       "best_practices": 0-100,
       "overall": 0-100
+  }},
+  "issue_distribution": {{
+      "Bug Risk": 0,
+      "Logic Error": 0,
+      "Code Smell": 0,
+      "Poor Naming": 0,
+      "Overcomplicated": 0,
+      "Style": 0,
+      "Documentation": 0,
+      "Performance": 0,
+      "Resource Leak": 0,
+      "Security": 0,
+      "Authentication": 0,
+      "Unsafe Operation": 0,
+      "Best Practice": 0,
+      "Error Handling": 0,
+      "Testing": 0,
+      "Compatibility": 0,
+      "Dependency": 0,
+      "Type Safety": 0,
+      "Concurrency": 0
   }}
 }}
 
-IMPORTANT: 
-- Be thorough and specific
+CRITICAL INSTRUCTIONS:
+- ONLY use issue types from: {valid_types_str}
+- ONLY use severity levels from: {valid_severities_str}
 - Include actual line numbers when possible
+- Be thorough and specific
 - Provide actionable recommendations
 - Consider industry standards for {ext} files
 - Flag security issues immediately
 - Include performance optimization tips
+- Count each issue by type in the issue_distribution field
 
 Code to review:
 ```{ext}
@@ -147,6 +237,11 @@ Code to review:
     response = llm.invoke([HumanMessage(content=prompt)])
     try:
         result = json.loads(response.content)
+        # Validate and fix issues
+        if "issues" in result:
+            result["issues"] = fix_invalid_issues(result.get("issues", []))
+        # Calculate issue distribution
+        result["issue_distribution"] = count_issues_by_type(result.get("issues", []))
     except json.JSONDecodeError as e:
         result = {
             "filename": filename,
@@ -157,13 +252,14 @@ Code to review:
             "improvements": [],
             "feedback": {"strengths": [], "weaknesses": [], "best_practices_found": [], "best_practices_missing": []},
             "file_score": {"maintainability": 75, "readability": 75, "robustness": 75,
-                          "security": 75, "performance": 75, "best_practices": 75, "overall": 75}
+                          "security": 75, "performance": 75, "best_practices": 75, "overall": 75},
+            "issue_distribution": {"Code Smell": 1}
         }
 
     state["result"] = result
     return state
 
-# ---------------- Graph Construction ---------------- #
+# ==================== GRAPH CONSTRUCTION ====================
 
 graph = StateGraph(ReviewState)
 graph.add_node("analyze_code", analyze_code_node)
@@ -171,18 +267,16 @@ graph.set_entry_point("analyze_code")
 graph.set_finish_point("analyze_code")
 review_graph = graph.compile()
 
-# ---------------- Enhanced Helper Functions ---------------- #
+# ==================== HELPER FUNCTIONS ====================
 
 def filter_reviewable_files(temp_dir: str) -> List[tuple]:
     """Filter and prioritize reviewable files."""
     reviewable_files = []
 
     for root, dirs, files in os.walk(temp_dir):
-        # Remove ignored directories
         dirs[:] = [d for d in dirs if d not in IGNORE_DIRS]
         
         for file in files:
-            # Skip ignored files
             if file in IGNORE_FILES:
                 continue
                 
@@ -192,11 +286,10 @@ def filter_reviewable_files(temp_dir: str) -> List[tuple]:
                 relative_path = os.path.relpath(full_path, temp_dir)
                 reviewable_files.append((full_path, relative_path, file))
 
-    # Sort by priority (priority files first, then by path)
     reviewable_files.sort(
         key=lambda x: (
-            x[2] not in PRIORITY_FILES,  # Priority files first (False < True)
-            x[1]  # Then alphabetically by relative path
+            x[2] not in PRIORITY_FILES,
+            x[1]
         )
     )
     
@@ -224,7 +317,6 @@ def process_folder(zip_bytes: bytes) -> Dict[str, Any]:
     temp_dir = tempfile.mkdtemp()
     
     try:
-        # Extract zip
         with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as z:
             z.extractall(temp_dir)
 
@@ -273,13 +365,12 @@ def process_folder(zip_bytes: bytes) -> Dict[str, Any]:
         return aggregate_results(results)
         
     finally:
-        # Cleanup temp directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
 
 
 def aggregate_results(file_reviews: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Enhanced aggregation with comprehensive statistics."""
+    """Enhanced aggregation with comprehensive statistics and issue distribution."""
     valid_reviews = [f for f in file_reviews if "file_score" in f and not f.get("error")]
     
     if valid_reviews:
@@ -294,9 +385,20 @@ def aggregate_results(file_reviews: List[Dict[str, Any]]) -> Dict[str, Any]:
             len([i for i in f.get("issues", []) if i.get("severity") == "Critical"])
             for f in valid_reviews
         )
+        
+        # Aggregate issue distribution across all files
+        overall_issue_distribution = {issue_type: 0 for issue_type in VALID_ISSUE_TYPES}
+        for file_review in valid_reviews:
+            file_dist = file_review.get("issue_distribution", {})
+            for issue_type, count in file_dist.items():
+                if issue_type in overall_issue_distribution:
+                    overall_issue_distribution[issue_type] += count
+        
+        overall_issue_distribution = {k: v for k, v in overall_issue_distribution.items() if v > 0}
     else:
         avg_overall = avg_maintainability = avg_security = 0
         total_issues = total_improvements = critical_issues = 0
+        overall_issue_distribution = {}
 
     return {
         "metadata": {
@@ -314,6 +416,7 @@ def aggregate_results(file_reviews: List[Dict[str, Any]]) -> Dict[str, Any]:
             "total_issues_found": total_issues,
             "total_improvements_suggested": total_improvements,
             "critical_issues": critical_issues,
+            "issue_distribution": overall_issue_distribution,
             "recommendation": generate_summary_recommendation(avg_overall, critical_issues)
         }
     }
