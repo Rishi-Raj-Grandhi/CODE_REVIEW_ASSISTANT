@@ -5,8 +5,8 @@ An intelligent code review tool that leverages AI to analyze codebases for quali
 ![Project Screenshot](images/dashboard-screenshot.png)
 *Dashboard displaying comprehensive code analysis results*
 
-
-##demo video
+**
+##demo video**
 
 open loom link-->https://www.loom.com/share/29c86bda634d4ef198db2291ab0630b1?sid=b33edfc3-b9ef-4708-8563-2f8041b2c395
 ## Overview
