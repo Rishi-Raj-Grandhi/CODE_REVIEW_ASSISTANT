@@ -6,10 +6,11 @@ import FilesList from './components/FilesList';
 import IssuesFeed from './components/IssuesFeed';
 import './styles/Dashboard.css';
 
-export default function Dashboard() {
+export default function Dashboard({ onLogout }) {
   const [reviewData, setReviewData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const username = sessionStorage.getItem('username') || 'User';
 
   const handleUploadSuccess = (data) => {
     setReviewData(data);
@@ -28,8 +29,16 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>📋 CODE REVIEWER ASSISTANT</h1>
-        <p>Automated code quality analysis powered by AI</p>
+        <div>
+          <h1>📋 CODE REVIEWER ASSISTANT</h1>
+          <p>Automated code quality analysis powered by AI</p>
+        </div>
+        <div className="user-section">
+          <span className="username">👤 {username}</span>
+          <button className="logout-btn" onClick={onLogout}>
+            Logout
+          </button>
+        </div>
       </header>
 
       {error && (

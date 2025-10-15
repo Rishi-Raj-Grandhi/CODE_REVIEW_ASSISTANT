@@ -4,15 +4,28 @@ import zipfile
 import tempfile
 import json
 import shutil
+import bcrypt
+import uuid
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage
 from langgraph.graph import StateGraph, END
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+load_dotenv(os.path.join(PROJECT_ROOT, ".env")) 
+
+# connect to MongoDB
+client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
+db = client["code_review_app"]
+users = db["users"]
+uploads_collection=db["review_data"]
+
+
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY not found in .env file.")
@@ -449,3 +462,57 @@ def route_input(input_type: str, data: Any) -> Dict[str, Any]:
 def process_uploaded_input(input_type: str, data: Any):
     """Main entry point for processing uploads."""
     return route_input(input_type, data)
+def register_user(username: str, password: str):
+    """
+    Registers a new user with a unique auto-generated user ID and hashed password.
+    """
+    # Check if username already exists
+    if users.find_one({"username": username}):
+        return {"status": "error", "message": "Username already exists"}
+
+    # Generate a random unique user ID
+    userid = str(uuid.uuid4())
+
+    # Hash the password
+    hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    user_data = {
+        "username": username,
+        "userid": userid,
+        "password": hashed_pw.decode('utf-8'),
+    }
+
+    users.insert_one(user_data)
+    return {
+        "status": "success",
+        "message": "User registered successfully",
+        "user": {"username": username, "userid": userid}
+    }
+
+
+def login_user(username: str, password: str):
+    """
+    Verifies login credentials using username and password.
+    """
+    user = users.find_one({"username": username})
+    if not user:
+        return {"status": "error", "message": "User not found"}
+
+    if bcrypt.checkpw(password.encode('utf-8'), user["password"].encode('utf-8')):
+        return {
+            "status": "success",
+            "message": "Login successful",
+            "user": {"username": user["username"], "userid": user["userid"]}
+        }
+    else:
+        return {"status": "error", "message": "Invalid password"}
+
+
+def save_to_db(user_id: str, upload_type: str, result: dict):
+    """Save upload response in DB with user_id and timestamp."""
+    uploads_collection.insert_one({
+        "user_id": user_id,
+        "upload_type": upload_type,
+        "result": result,
+        "timestamp": datetime.utcnow()
+    })

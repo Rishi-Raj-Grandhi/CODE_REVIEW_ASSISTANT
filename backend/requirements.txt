@@ -5,3 +5,5 @@ langchain
 langgraph
 tree_sitter
 pathlib
+pymongo
+brcrypt
