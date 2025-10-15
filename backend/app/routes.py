@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from typing import List
 from app.services import process_uploaded_input
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
-from app.services import register_user, login_user ,save_to_db
+from app.services import register_user, login_user ,save_to_db,get_user_uploads
 
 # Initialize router
 router = APIRouter()
@@ -82,4 +82,12 @@ async def login(
     Logs in a user using username and password.
     """
     result = login_user(username, password)
+    return JSONResponse(content=result)
+
+@router.post("/user/uploads/")
+async def get_uploads(user_id: str = Form(...)):
+    """
+    Returns all uploads for the given user_id.
+    """
+    result = get_user_uploads(user_id)
     return JSONResponse(content=result)

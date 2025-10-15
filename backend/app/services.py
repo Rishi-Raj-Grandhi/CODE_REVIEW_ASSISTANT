@@ -516,3 +516,27 @@ def save_to_db(user_id: str, upload_type: str, result: dict):
         "result": result,
         "timestamp": datetime.utcnow()
     })
+
+def get_user_uploads(user_id: str):
+    """
+    Fetch all uploads associated with a given user_id.
+    Converts timestamp to ISO format for JSON serialization.
+    """
+    uploads = list(uploads_collection.find({"user_id": user_id}, {"_id": 0}))
+    
+    if not uploads:
+        return {
+            "status": "error",
+            "message": "No uploads found for this user."
+        }
+
+    # Convert timestamp to string
+    for upload in uploads:
+        if "timestamp" in upload and isinstance(upload["timestamp"], datetime):
+            upload["timestamp"] = upload["timestamp"].isoformat()
+
+    return {
+        "status": "success",
+        "message": "Uploads retrieved successfully.",
+        "data": uploads
+    }
