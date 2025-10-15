@@ -35,8 +35,44 @@ The application follows a modern full-stack architecture:
 - **Database**: MongoDB for flexible document storage and efficient querying
 - **AI Integration**: OpenAI GPT-4o-mini via LangChain for structured code analysis
 
-![Architecture Diagram](images/architecture-diagram.png)
-*System architecture overview*
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        A[React FrontendVite + Axios + Chart.js]
+    end
+    
+    subgraph "API Layer"
+        B[FastAPI BackendPython 3.11+ + Uvicorn]
+    end
+    
+    subgraph "Service Layer"
+        C[Code Analysis EngineLangChain]
+        D[Authentication ServiceJWT + Bcrypt]
+    end
+    
+    subgraph "Data Layer"
+        E[(MongoDBPyMongo)]
+    end
+    
+    subgraph "External Services"
+        F[OpenAI APIGPT-4o-mini]
+    end
+    
+    A -->|HTTP/REST| B
+    B --> C
+    B --> D
+    C --> E
+    D --> E
+    C -->|API Calls| F
+    
+    style A fill:#667eea,stroke:#5568d3,color:#fff
+    style B fill:#f5576c,stroke:#e04858,color:#fff
+    style C fill:#f5576c,stroke:#e04858,color:#fff
+    style D fill:#f5576c,stroke:#e04858,color:#fff
+    style E fill:#4facfe,stroke:#3a98e8,color:#fff
+    style F fill:#43e97b,stroke:#38d96a,color:#fff
+```
 
 ## Installation & Setup
 
