@@ -7,7 +7,7 @@ An intelligent code review tool that leverages AI to analyze codebases for quali
 
 ## Demo Video
 
-[▶️ Watch on Loom](https://www.loom.com/share/29c86bda634d4ef198db2291ab0630b1?sid=b33edfc3-b9ef-4708-8563-2f8041b2c395)
+[▶️ Watch the video](https://drive.google.com/file/d/1zAJ-zXVnimLrkr8Yp0DhpIlKYtFG80JY/view?usp=sharing)
 ## Overview
 
 Code Review Assistant provides automated, comprehensive code analysis to help development teams maintain high code quality standards. The system analyzes uploaded code files or entire projects, identifying potential issues across 19 different categories and providing actionable recommendations for improvement.
