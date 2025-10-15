@@ -36,43 +36,6 @@ The application follows a modern full-stack architecture:
 - **AI Integration**: OpenAI GPT-4o-mini via LangChain for structured code analysis
 
 
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        A[React FrontendVite + Axios + Chart.js]
-    end
-    
-    subgraph "API Layer"
-        B[FastAPI BackendPython 3.11+ + Uvicorn]
-    end
-    
-    subgraph "Service Layer"
-        C[Code Analysis EngineLangChain]
-        D[Authentication ServiceJWT + Bcrypt]
-    end
-    
-    subgraph "Data Layer"
-        E[(MongoDBPyMongo)]
-    end
-    
-    subgraph "External Services"
-        F[OpenAI APIGPT-4o-mini]
-    end
-    
-    A -->|HTTP/REST| B
-    B --> C
-    B --> D
-    C --> E
-    D --> E
-    C -->|API Calls| F
-    
-    style A fill:#667eea,stroke:#5568d3,color:#fff
-    style B fill:#f5576c,stroke:#e04858,color:#fff
-    style C fill:#f5576c,stroke:#e04858,color:#fff
-    style D fill:#f5576c,stroke:#e04858,color:#fff
-    style E fill:#4facfe,stroke:#3a98e8,color:#fff
-    style F fill:#43e97b,stroke:#38d96a,color:#fff
-```
 
 ## Installation & Setup
 
@@ -126,8 +89,7 @@ MONGO_URI=mongodb://localhost:27017
 # MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/
 ```
 
-![Environment Setup](images/env-setup.png)
-*Environment configuration structure*
+
 
 ### Frontend Configuration
 
@@ -178,8 +140,10 @@ cd frontend/frontend
 npm run dev
 ```
 
-![Running the Application](images/startup-screens.png)
-*Application startup sequence*
+![Running the Application](images/startup-screens1.png)
+*Backend*
+![Running the Application](images/startup-screens2.png)
+*Frontend*
 
 Access points:
 - **Frontend Application**: http://localhost:5173
@@ -199,7 +163,7 @@ Access points:
 
 ### Code Upload
 
-![Upload Options](images/upload-options.png)
+![Upload Options](images/upload-interface.png)
 *Multiple upload method options*
 
 **Single File Upload:**
@@ -216,7 +180,7 @@ Access points:
 
 ### Analysis Results
 
-![Review Results](images/review-results.png)
+![Review Results](images/dashboard-screenshot.png)
 *Comprehensive analysis results display*
 
 Results include:
@@ -258,8 +222,7 @@ React application built with modern best practices:
 
 ### Development Workflow
 
-![Development Workflow](images/dev-workflow.png)
-*Development and testing workflow*
+
 
 1. Implement changes in respective components
 2. Leverage hot-reload functionality for rapid iteration
@@ -298,8 +261,7 @@ React application built with modern best practices:
 
 ### Issue Categories
 
-![Issue Types](images/issue-types.png)
-*Comprehensive issue classification system*
+
 
 The analysis engine evaluates code across 19 distinct categories:
 
@@ -351,8 +313,7 @@ Module not found: Can't resolve 'react'
 ```
 **Resolution:** Execute `npm install` in `frontend/frontend` directory to install all dependencies.
 
-![Troubleshooting Guide](images/troubleshooting.png)
-*Common issues and resolutions*
+
 
 ### Performance Considerations
 
@@ -415,8 +376,7 @@ Contributions are welcome. To contribute:
 3. Implement changes with appropriate tests
 4. Submit a pull request with detailed description
 
-![Contributing Guide](images/contributing.png)
-*Contribution workflow*
+
 
 ## License
 
@@ -437,5 +397,4 @@ This project is licensed under the MIT License. See LICENSE file for details.
 - Interactive API documentation at `/docs`
 - Issue tracking available on GitHub
 
-![Support Information](images/support.png)
-*Support resources and documentation*
+
